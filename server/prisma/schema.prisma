@@ -1,0 +1,80 @@
+// Prisma schema for SocialSpace backend
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  username  String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  posts     Post[]
+  comments  Comment[]
+  likes     Like[]
+  following Follow[] @relation("following")
+  followers Follow[] @relation("followedBy")
+  name      String?
+  bio       String?
+  avatar    String?
+  notifications Notification[]
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  content   String
+  createdAt DateTime  @default(now())
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  Int
+  comments  Comment[]
+  likes     Like[]
+  notifications Notification[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+
+  @@unique([userId, postId])
+}
+
+model Follow {
+  id          Int  @id @default(autoincrement())
+  follower    User @relation("following", fields: [followerId], references: [id])
+  followerId  Int
+  following   User @relation("followedBy", fields: [followingId], references: [id])
+  followingId Int
+
+  @@unique([followerId, followingId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  type      String   // 'like', 'comment', 'follow', 'post'
+  message   String
+  postId    Int?
+  post      Post?    @relation(fields: [postId], references: [id])
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
+}
