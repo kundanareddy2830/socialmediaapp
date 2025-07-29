@@ -1,46 +1,46 @@
-SocialSpace
+
 SocialSpace is a modern, full-stack social media application designed to provide a seamless and interactive user experience. It features a complete set of social networking functionalities, including user profiles, posts, comments, and a like/follow system. The project is built with a professional-grade technology stack, featuring a React frontend and an Express.js backend.
 
-✨ Features
-User Authentication: Secure user registration and login system using JWT (JSON Web Tokens).
+✨ **Features**
+**User Authentication:** Secure user registration and login system using JWT (JSON Web Tokens).
 
-User Profiles: View and manage user profiles with posts, followers, and following counts.
+**User Profiles:** View and manage user profiles with posts, followers, and following counts.
 
-Create & View Posts: Users can create new posts and view a feed of all posts from the community.
+**Create & View Posts:** Users can create new posts and view a feed of all posts from the community.
 
-Commenting System: Add comments to any post.
+**Commenting System:** Add comments to any post.
 
-Like/Unlike Posts: Engage with content by liking or unliking posts.
+**Like/Unlike Posts:** Engage with content by liking or unliking posts.
 
-Follow/Unfollow Users: Build a social network by following other users.
+**Follow/Unfollow Users:** Build a social network by following other users.
 
-Modern UI: A clean, responsive, and mobile-friendly interface built with shadcn/ui and Tailwind CSS.
+**Modern UI:** A clean, responsive, and mobile-friendly interface built with shadcn/ui and Tailwind CSS.
 
-Type-Safe Codebase: Fully implemented in TypeScript for both frontend and backend to ensure robustness and maintainability.
+**Type-Safe Codebase:** Fully implemented in TypeScript for both frontend and backend to ensure robustness and maintainability.
 
-🛠️ Tech Stack
+**🛠️ Tech Stack**
 This project is a monorepo containing two main parts: the server (backend) and the socialspace directory (frontend).
 
 Area
 
 Technology
 
-Backend
+**Backend**
 
 Node.js, Express.js, TypeScript, Prisma ORM, SQLite, JWT, bcryptjs
 
-Frontend
+**Frontend**
 
 React 18, Vite, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query
 
-Tooling
+**Tooling**
 
 ESLint, Prettier, npm
 
-🚀 Getting Started
+**🚀 Getting Started**
 Follow these instructions to get the project up and running on your local machine for development and testing purposes.
 
-Prerequisites
+**Prerequisites**
 Node.js (v18 or newer recommended)
 
 npm (comes with Node.js)
