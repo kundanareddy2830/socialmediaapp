@@ -342,7 +342,7 @@ const trendingTopics = [
 ];
 
 export const SocialProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(initialUsers[0]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
 

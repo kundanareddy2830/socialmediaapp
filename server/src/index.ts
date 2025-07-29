@@ -3,12 +3,16 @@ import cors from 'cors';
 import prisma from './prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import 'dotenv/config';
 
 const app = express();
 const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
+
+
+console.log('DATABASE_URL:', process.env.DATABASE_URL);
 
 // Extend Express Request type to include 'user'
 interface AuthRequest extends Request {
@@ -28,6 +32,7 @@ function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) 
 
 // --- AUTH ROUTES ---
 app.post('/api/auth/register', async (req, res) => {
+  console.log('POST /api/auth/register called', req.body);
   const { email, username, password } = req.body;
   if (!email || !username || !password) {
     return res.status(400).json({ error: 'Email, username, and password are required.' });
@@ -51,6 +56,7 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 app.post('/api/auth/login', async (req, res) => {
+  console.log('POST /api/auth/login called', req.body);
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required.' });
@@ -79,6 +85,7 @@ app.post('/api/auth/login', async (req, res) => {
 
 // --- NOTIFICATIONS ENDPOINT ---
 app.get('/api/notifications', authenticateToken, async (req: AuthRequest, res: Response) => {
+  console.log('GET /api/notifications called by user', req.user.userId);
   try {
     const notifications = await prisma.notification.findMany({
       where: { userId: req.user.userId },
@@ -94,6 +101,7 @@ app.get('/api/notifications', authenticateToken, async (req: AuthRequest, res: R
 
 // --- POST ROUTES ---
 app.post('/api/posts', authenticateToken, async (req: AuthRequest, res: Response) => {
+  console.log('POST /api/posts called by user', req.user.userId, 'with content:', req.body.content);
   const { content } = req.body;
   const authorId = req.user.userId;
   if (!content) {
@@ -108,7 +116,7 @@ app.post('/api/posts', authenticateToken, async (req: AuthRequest, res: Response
     });
     // Notify all followers
     const followers = await prisma.follow.findMany({ where: { followingId: authorId } });
-    await Promise.all(followers.map(f =>
+    await Promise.all(followers.map((f: any) =>
       prisma.notification.create({
         data: {
           userId: f.followerId,
@@ -117,6 +125,8 @@ app.post('/api/posts', authenticateToken, async (req: AuthRequest, res: Response
           postId: post.id,
         }
       })
+    
+    
     ));
     res.status(201).json(post);
   } catch (err) {
@@ -126,6 +136,7 @@ app.post('/api/posts', authenticateToken, async (req: AuthRequest, res: Response
 });
 
 app.get('/api/posts', async (req, res) => {
+  console.log('GET /api/posts called');
   try {
     const posts = await prisma.post.findMany({
       orderBy: { createdAt: 'desc' },
@@ -143,6 +154,7 @@ app.get('/api/posts', async (req, res) => {
 });
 
 app.post('/api/posts/:id/comment', authenticateToken, async (req: AuthRequest, res: Response) => {
+  console.log('POST /api/posts/' + req.params.id + '/comment called by user', req.user.userId, 'with content:', req.body.content);
   const { content } = req.body;
   const authorId = req.user.userId;
   const postId = Number(req.params.id);
@@ -177,6 +189,7 @@ app.post('/api/posts/:id/comment', authenticateToken, async (req: AuthRequest, r
 });
 
 app.post('/api/posts/:id/like', authenticateToken, async (req: AuthRequest, res: Response) => {
+  console.log('POST /api/posts/' + req.params.id + '/like called by user', req.user.userId);
   const userId = req.user.userId;
   const postId = Number(req.params.id);
   try {
@@ -223,6 +236,7 @@ app.post('/api/posts/:id/like', authenticateToken, async (req: AuthRequest, res:
 });
 
 app.post('/api/users/:id/follow', authenticateToken, async (req: AuthRequest, res: Response) => {
+  console.log('POST /api/users/' + req.params.id + '/follow called by user', req.user.userId);
   const followerId = req.user.userId;
   const followingId = Number(req.params.id);
   try {
@@ -267,6 +281,7 @@ app.post('/api/users/:id/follow', authenticateToken, async (req: AuthRequest, re
 });
 
 app.put('/api/users/:id', authenticateToken, async (req: AuthRequest, res: Response) => {
+  console.log('PUT /api/users/' + req.params.id + ' called by user', req.user.userId, 'with data:', req.body);
   const { id } = req.params;
   const { name, bio, avatar } = req.body;
   try {
@@ -281,7 +296,29 @@ app.put('/api/users/:id', authenticateToken, async (req: AuthRequest, res: Respo
   }
 });
 
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        avatar: true,
+        bio: true,
+        followers: true,
+        following: true,
+        posts: true
+      }
+    });
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch users.' });
+  }
+});
+
 app.get('/api/users/:username', async (req, res) => {
+  console.log('GET /api/users/' + req.params.username + ' called');
   const { username } = req.params;
   try {
     const user = await prisma.user.findUnique({
@@ -307,6 +344,36 @@ app.get('/api/users/:username', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch user profile.' });
+  }
+});
+
+app.get('/api/users/id/:id', async (req, res) => {
+  console.log('GET /api/users/id/' + req.params.id + ' called');
+  const { id } = req.params;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: Number(id) },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        createdAt: true,
+        posts: true,
+        followers: true,
+        following: true
+      }
+    });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.json({
+      ...user,
+      followersCount: user.followers.length,
+      followingCount: user.following.length
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch user profile by ID.' });
   }
 });
 

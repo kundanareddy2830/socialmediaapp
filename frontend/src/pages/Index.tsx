@@ -12,7 +12,23 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../lib/api';
 
 const Index = () => {
-  const { users } = useSocial();
+  const { users: mockUsers } = useSocial();
+  const { data: realUsers = [], isLoading: usersLoading, error: usersError } = useQuery({
+    queryKey: ['all-users'],
+    queryFn: async () => {
+      const { data } = await api.get('/users');
+      return data;
+    }
+  });
+
+  // Merge mock and real users, avoiding duplicates by id
+  const allUsers = [
+    ...mockUsers,
+    ...realUsers.filter(
+      realUser => !mockUsers.some(mockUser => String(mockUser.id) === String(realUser.id))
+    )
+  ];
+
   const { data: posts = [], isLoading: postsLoading, error: postsError } = useQuery({
     queryKey: ['posts'],
     queryFn: async () => {
@@ -32,7 +48,7 @@ const Index = () => {
             {/* People You May Know */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">People You May Know</h2>
-              {users.slice(0, 3).map((user) => (
+              {allUsers.slice(0, 3).map((user) => (
                 <UserCard key={user.id} user={user} />
               ))}
             </div>

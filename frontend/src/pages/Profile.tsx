@@ -9,20 +9,29 @@ import { User as UserIcon, MapPin, Calendar, Link as LinkIcon, Shield } from 'lu
 import { useQuery } from '@tanstack/react-query';
 import api from '../lib/api';
 import { getCurrentUserId, logout } from '../lib/auth';
+import { useSocial } from '../contexts/SocialContext';
 
 const Profile = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const { users: mockUsers } = useSocial();
 
-  // Fetch user profile and posts from backend
+  // Try to fetch from backend
   const { data: userData, isLoading, error } = useQuery({
     queryKey: ['user-profile', userId],
     queryFn: async () => {
-      const { data } = await api.get(`/users/${userId}`);
+      const { data } = await api.get(`/users/id/${userId}`);
       return data;
     },
     enabled: !!userId,
+    retry: false,
   });
+
+  // Fallback to mock data if backend fails
+  let user = userData;
+  if ((error || !userData) && userId) {
+    user = mockUsers.find(u => u.id === userId);
+  }
 
   if (isLoading) {
     return (
@@ -35,7 +44,7 @@ const Profile = () => {
     );
   }
 
-  if (error || !userData) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
         <Header />
@@ -48,7 +57,6 @@ const Profile = () => {
     );
   }
 
-  const user = userData;
   const userPosts = user.posts || [];
   const currentUserId = getCurrentUserId();
   const isCurrentUser = currentUserId && user.id === currentUserId;

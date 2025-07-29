@@ -36,7 +36,7 @@ const Header = () => {
               <MessageCircle className="w-5 h-5" />
             </Button>
 
-            {currentUser && (
+            {currentUser ? (
               <Link to={`/profile/${currentUser.id}`}>
                 <div className="flex items-center space-x-2">
                   <Avatar className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-blue-300 dark:hover:ring-blue-500/50 transition-all">
@@ -49,6 +49,12 @@ const Header = () => {
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   )}
                 </div>
+              </Link>
+            ) : (
+              <Link to="/login">
+                <Button variant="outline" size="sm" className="social-gradient">
+                  Login
+                </Button>
               </Link>
             )}
           </div>

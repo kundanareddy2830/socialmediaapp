@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api, { setAuthToken } from '../lib/api';
 
 const Login: React.FC = () => {
@@ -57,6 +57,14 @@ const Login: React.FC = () => {
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>
+        <div className="text-center">
+          <p className="text-gray-600 dark:text-slate-400">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+              Create Account
+            </Link>
+          </p>
+        </div>
       </form>
     </div>
   );

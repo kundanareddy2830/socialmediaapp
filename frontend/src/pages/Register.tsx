@@ -22,10 +22,14 @@ const Register: React.FC = () => {
         password,
         name,
       });
-      setAuthToken(data.token);
-      localStorage.setItem('token', data.token);
+      // If backend returns the new user's id, redirect to their profile
+      if (data && data.id) {
+        navigate(`/profile/${data.id}`);
+      } else {
+        // fallback: go to home
+        navigate('/');
+      }
       setLoading(false);
-      navigate('/');
     } catch (err: any) {
       setLoading(false);
       setError(err.response?.data?.error || 'Registration failed.');
